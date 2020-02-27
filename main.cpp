@@ -13,8 +13,8 @@
 
 //Define motor and encoder constants
 #define CPR 318      //Counts per revolution
-#define CPI 52.13    //Estimated counts per inch??
-#define CPD 318./360.      //Estimated counts per degree of rotation
+#define CPI 40.49    //Estimated counts per inch??
+#define CPD 0.883      //Estimated counts per degree of rotation
 #define P 1.0        //Power ratio
 #define R 0.99       //Power reduction ratio of stronger wheel to allow weak wheel to catch up.
 
@@ -97,14 +97,19 @@ int main()
 
     //Going towards ticket and getting ready for some sliding action
     turn(LEFT, 25, 90);
-    drive(FORWARD, 25, 25);
-    while(front_right.Value() || front_left.Value());
+    drive(FORWARD, 25, 25); //distance doesn't matter, only drive until bump switches are hit
+    while(right_switch.Value() || left_switch.Value());
     stopMotors();
     drive(BACKWARD, 25, 3);
+    
 
     //Thrusting lever, hook onto ticket, let go of ticket
-
-
+    turnPivotRight(25, 90);
+    drive(FORWARD, 25, 24); //distance doesn't matter, only drive until bump switches are hit
+    while(right_switch.Value() || left_switch.Value());
+    stopMotors();
+    drive(BACKWARD, 25, 2.5);
+    turnPivotRight(-25, 14)
 }
 //end main*****************************************************************************
 
@@ -166,7 +171,7 @@ void turn(int direction, float power, float degrees) {
     int counts = CPD*degrees;
 
    //Set both motors to desired percent
-    right_motor.SetPercent(R*direction*power);
+    right_motor.SetPercent(-R*direction*power);
     left_motor.SetPercent(P*direction*power);
 
     while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts);
@@ -175,7 +180,7 @@ void turn(int direction, float power, float degrees) {
 }
 
 //turn right function but make the robot pivot on the right wheel.
-void turnPivotRight(float power, float degrees) {
+void turnPivotRight(int direction, float power, float degrees) {
     //Reset encoder counts
     reset_encoders();
     
@@ -183,7 +188,7 @@ void turnPivotRight(float power, float degrees) {
     int counts = CPD*degrees;
     
     //Set left motor to desired percentage
-    left_motor.SetPercent(P*power);
+    left_motor.SetPercent(P*direction*power);
     
     while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts);
     
@@ -191,7 +196,7 @@ void turnPivotRight(float power, float degrees) {
 }
 
 //turn left function but pivot the robot on its left side. 
-void turnPivotLeft(float power, float degrees) {
+void turnPivotLeft(int direction, float power, float degrees) {
     //Reset encoder counts
     reset_encoders();
     
@@ -199,12 +204,9 @@ void turnPivotLeft(float power, float degrees) {
     int counts = CPD*degrees;
     
     //Set left motor to desired percentage
-    right_motor.SetPercent(R*power);
+    right_motor.SetPercent(-R*direction*power);
     
     while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts);
     
     right_motor.Stop();
 }
-
-
-
