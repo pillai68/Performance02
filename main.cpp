@@ -14,7 +14,7 @@
 //Define motor and encoder constants
 #define CPR 318      //Counts per revolution
 #define CPI 52.13    //Estimated counts per inch??
-#define CPD 5.0      //Estimated counts per degree of rotation
+#define CPD 318./360.      //Estimated counts per degree of rotation
 #define P 1.0        //Power ratio
 #define R 0.99       //Power reduction ratio of stronger wheel to allow weak wheel to catch up.
 
@@ -48,7 +48,7 @@ FEHMotor left_motor(FEHMotor::Motor1,9.0);
 FEHServo buttonServo(FEHServo::Servo0); //declaring the servo to port 0.
 FEHServo leverServo(FEHServo::Servo7);//declaring the servo to 7.
 //declaring cds cell
-AnalogInputPin cds(FEHIO::P2_0); 
+AnalogInputPin cds(FEHIO::P2_0);
 //Declaring bump switches
 DigitalInputPin left_switch(FEHIO::P2_0);
 DigitalInputPin right_switch(FEHIO::P2_1);
@@ -62,56 +62,48 @@ void turn(int direction, float power, float degrees);
 
 
 
-//start main ***************************************************************************\
+//start main *************************************************************************
 int main()
 {
     //Code for bump switch:
-        //while(front_right.Value() || front_left.Value()){ }
-    
+        //while(front_right.Value() || front_left.Value());
+
     // get the voltage level and display it to the screen
     LCD.WriteLine( Battery.Voltage() );
     Sleep( 0.5 );
 
     //Code to make robot read the start light to move
     while(!(cds.Value()>0.300 && cds.Value()<0.358));
-    buttonServo.SetMin(590);
-    buttonServo.SetMax(2330);
+    buttonServo.SetMin(BUTTON_MIN);
+    buttonServo.SetMax(BUTTON_MAX);
     buttonServo.SetDegree(0);
-    
-    leverServo.setMin()
+    leverServo.SetMin(LEVER_MIN);
+    leverServo.SetMax(LEVER_MAX);
+    leverServo.SetDegree(165); //lever arm will be at the top in position to hold the tray.
 
-    //Moving Robot to jukebox
-    int motor_percent = 25; //intializes motor percent
-    float counts = 40.49; //intializes encoder counts
+    //Moving up the sink
 
-    move_forward(motor_percent, counts*18.5);
-    //Approaching the light.
-    /*while(!(cds.Value()>0 && cds.Value()<0.23) || !(cds.Value()>1.35 && cds.Value()<1.39)){
-        //code to make robot read the light, approach the to press jukebox button
-        move_forward(-motor_percent,counts*0.1); //robot moves backward around 4 inches
-    }*/
 
+    //Dropping the tray into the sink
+
+    //Moving from sink, towards the hot plate
+
+    //Moving from hot plate, down the ramp
+    drive(BACKWARD, 15, 2);
+    turn(LEFT, 25, 90);
+    drive(FORWARD, 15, 4);
+    turn(LEFT, 25, 90);
+    drive(FORWARD, 25, 40);
+
+    //Going towards ticket and getting ready for some sliding action
+    turn(LEFT, 25, 90);
+    drive(FORWARD, 25, 25);
+    while(front_right.Value() || front_left.Value());
     stopMotors();
-    Sleep(2.0);
-    //Changing the orientation of buttonServo to read light
-    changeButtonServo();
+    drive(BACKWARD, 25, 3);
 
-    left_motor.SetPercent(25);
-    Sleep(1.80);
+    //Thrusting lever, hook onto ticket, let go of ticket
 
-    //Moving robot closer to jukebox
-    move_forward(-motor_percent,counts*10.5); //robot moves backward for 2 inches
-
-    //moving robot to and up the Ramp
-    move_forward(motor_percent,counts*4); //robot moves backwards for about 2 inches
-    turn_right(motor_percent,counts*5); //makes a 90 degree right turn that's about 6 inches
-    move_forward(motor_percent,counts*8.75); //robot moves forward around 8 inches
-    turn_right(motor_percent,counts*5.5);//makes a 90 degree left turn that's about 6
-    move_forward(-motor_percent*2,counts*35); //robot moves forward around 30 inches up the ramp
-
-    //Move the robot down the ramp
-    Sleep(0.5);
-    move_forward(motor_percent,counts*30);
 
 }
 //end main*****************************************************************************
@@ -170,16 +162,48 @@ void turn(int direction, float power, float degrees) {
     //Reset encoder counts
     reset_encoders();
 
+    //initializing counts according to the number of degrees.
+    int counts = CPD*degrees;
+
    //Set both motors to desired percent
     right_motor.SetPercent(R*direction*power);
     left_motor.SetPercent(P*direction*power);
 
     while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts);
+    
+    stopMotors();
+}
 
-    //Turn off motors
-    right_motor.Stop();
+//turn right function but make the robot pivot on the right wheel.
+void turnPivotRight(float power, float degrees) {
+    //Reset encoder counts
+    reset_encoders();
+    
+    //initializing counts according to the number of degrees.
+    int counts = CPD*degrees;
+    
+    //Set left motor to desired percentage
+    left_motor.SetPercent(P*power);
+    
+    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts);
+    
     left_motor.Stop();
+}
 
+//turn left function but pivot the robot on its left side. 
+void turnPivotLeft(float power, float degrees) {
+    //Reset encoder counts
+    reset_encoders();
+    
+    //initializing counts according to the number of degrees.
+    int counts = CPD*degrees;
+    
+    //Set left motor to desired percentage
+    right_motor.SetPercent(R*power);
+    
+    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts);
+    
+    right_motor.Stop();
 }
 
 
