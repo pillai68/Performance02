@@ -76,7 +76,7 @@ int main()
     while(!(cds.Value()>LR && cds.Value()<UR));
     buttonServo.SetMin(BUTTON_MIN);
     buttonServo.SetMax(BUTTON_MAX);
-    buttonServo.SetDegree(0);
+    buttonServo.SetDegree(20);
 
     leverServo.SetMin(LEVER_MIN);
     leverServo.SetMax(LEVER_MAX);
@@ -90,21 +90,19 @@ int main()
 
     //Code to make robot approach sink and dump the tray
     turn(LEFT,25,90);
+    drive(FORWARD,25,20);
+    while(right_switch.Value() && left_switch.Value());
+    stopMotors();
+    
+    drive(BACKWARD,25,1);
+    turn(LEFT,25,90);
+    
+    drive(FORWARD, 25, 8);
+    while(right_switch.Value() && left_switch.Value());
 
-    while(!right_switch.Value() || !left_switch.Value()){
-        drive(FORWARD,25,20);
-    }
-
-        drive(BACKWARD,25,1);
-        turn(LEFT,25,90);
-
-     while(!right_switch.Value() || !left_switch.Value()){
-        drive(FORWARD,25,8);
-        }
-
-     drive(BACKWARD,25,1);
-     leverServo.SetDegree(45);
-     Sleep(2.0);
+    drive(BACKWARD,25,1);
+    leverServo.SetDegree(105);
+    Sleep(2.0); 
 
      //Code to move robot to the hot plate
      leverServo.SetDegree(0);
@@ -112,8 +110,14 @@ int main()
      turn(LEFT,25,90);
      drive(FORWARD,25,24);
      turn(LEFT,25,90);
-     leverServo.SetDegree(75);
      drive(FORWARD,25,20);
+    while(right_switch.Value() && left_switch.Value());
+    stopMotors();
+    drive(BACKWARD, 25, 1);
+    leverServo.SetDegree(105);
+    Sleep(0.5);
+    leverServo.SetDegree(0);
+    
 
         //Moving from hot plate, down the ramp
     drive(BACKWARD, 25, 4);
