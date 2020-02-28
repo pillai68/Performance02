@@ -15,8 +15,7 @@
 #define CPR 318      //Counts per revolution
 #define CPI 40.49    //Estimated counts per inch??
 #define CPD 0.883      //Estimated counts per degree of rotation
-#define P 1.0        //Power ratio
-#define R 0.99       //Power reduction ratio of stronger wheel to allow weak wheel to catch up.
+
 
 //Define direction multipliers
 #define FORWARD 1    //Direction multiplier for forward drive
@@ -93,16 +92,16 @@ int main()
     drive(FORWARD,25,20);
     while(right_switch.Value() && left_switch.Value());
     stopMotors();
-    
+
     drive(BACKWARD,25,1);
     turn(LEFT,25,90);
-    
+
     drive(FORWARD, 25, 8);
     while(right_switch.Value() && left_switch.Value());
 
     drive(BACKWARD,25,1);
     leverServo.SetDegree(105);
-    Sleep(2.0); 
+    Sleep(2.0);
 
      //Code to move robot to the hot plate
      leverServo.SetDegree(0);
@@ -117,7 +116,7 @@ int main()
     leverServo.SetDegree(105);
     Sleep(0.5);
     leverServo.SetDegree(0);
-    
+
 
         //Moving from hot plate, down the ramp
     drive(BACKWARD, 25, 4);
@@ -125,7 +124,7 @@ int main()
     drive(FORWARD, 25, 4);
     turn(LEFT, 25, 90);
     drive(FORWARD, 25, 40); // Goo all the way down the ramp
-    
+
 
     //Going towards ticket and getting ready for some sliding action
     turn(LEFT, 25, 90);
@@ -133,7 +132,7 @@ int main()
     while(right_switch.Value() || left_switch.Value());
     stopMotors();
     drive(BACKWARD, 25, 3);
-    
+
 
     //Thrusting lever, hook onto ticket, let go of ticket
     turnPivotRight(FORWARD, 25, 90);
@@ -189,8 +188,8 @@ void drive(int direction, float power, float inches) //using encoders
     reset_encoders();
     float counts = CPI*inches;
    //Set both motors to desired percent
-    right_motor.SetPercent(-R*direction*power); //right motor is oriented backwards, so negative means forward
-    left_motor.SetPercent(P*direction*power);
+    right_motor.SetPercent(-direction*power); //right motor is oriented backwards, so negative means forward
+    left_motor.SetPercent(direction*power);
 
    //While the average of the left and right encoder is less than counts,
     //keep running motors
@@ -210,13 +209,49 @@ void turn(int direction, float power, float degrees) {
     reset_encoders();
 
    //Set both motors to desired percent
-    right_motor.SetPercent(R*direction*power);
-    left_motor.SetPercent(P*direction*power);
+    right_motor.SetPercent(direction*power);
+    left_motor.SetPercent(direction*power);
 
     while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts);
 
     //Turn off motors
     right_motor.Stop();
     left_motor.Stop();
+
+}
+
+void pivotRightTurn(int direction, float power, float degrees) {
+
+    //Declaring counts
+    float counts = CPD*degrees;
+
+    //Reset encoder counts
+    reset_encoders();
+
+   //Set both motors to desired percent
+    left_motor.SetPercent(direction*power);
+
+    while((left_encoder.Counts()) / 2. < counts);
+
+    //Turn off motors
+    left_motor.Stop();
+
+}
+
+void pivotLeftTurn(int direction, float power, float degrees) {
+
+    //Declaring counts
+    float counts = CPD*degrees;
+
+    //Reset encoder counts
+    reset_encoders();
+
+   //Set both motors to desired percent
+    right_motor.SetPercent(direction*power);
+
+    while((right_encoder.Counts()) / 2. < counts);
+
+    //Turn off motors
+    right_motor.Stop();
 
 }
