@@ -35,8 +35,8 @@
 //Define servo max and mins
 #define BUTTON_MIN 590 //Button_servo min value??
 #define BUTTON_MAX 2330 //Button_servo max value??
-#define LEVER_MIN 900  //Button_servo min value??
-#define LEVER_MAX 1600  //Button_servo max value??
+#define LEVER_MIN 750  //Button_servo min value??
+#define LEVER_MAX 1900  //Button_servo max value??
 
 //Declaring name encoders
 DigitalEncoder right_encoder(FEHIO::P0_1);
@@ -103,13 +103,15 @@ int main()
     drive(BACKWARD, 25, 3);
     
 
-    //Thrusting lever, hook onto ticket, let go of ticket
-    turnPivotRight(25, 90);
+   //Thrusting lever, hook onto ticket, let go of ticket
+    turnPivotRight(FORWARD, 25, 90);
     drive(FORWARD, 25, 24); //distance doesn't matter, only drive until bump switches are hit
     while(right_switch.Value() || left_switch.Value());
     stopMotors();
     drive(BACKWARD, 25, 2.5);
-    turnPivotRight(-25, 14)
+    turnPivotRight(BACKWARD,25, 14);
+    turnPivotLeft(FORWARD, 25, 14);
+    turn(RIGHT, 25, -28);
 }
 //end main*****************************************************************************
 
