@@ -115,7 +115,32 @@ int main()
      leverServo.SetDegree(75);
      drive(FORWARD,25,20);
 
+        //Moving from hot plate, down the ramp
+    drive(BACKWARD, 25, 4);
+    turn(LEFT, 25, 90);
+    drive(FORWARD, 25, 4);
+    turn(LEFT, 25, 90);
+    drive(FORWARD, 25, 40); // Goo all the way down the ramp
+    
 
+    //Going towards ticket and getting ready for some sliding action
+    turn(LEFT, 25, 90);
+    drive(FORWARD, 25, 25); //distance doesn't matter, only drive until bump switches are hit
+    while(right_switch.Value() || left_switch.Value());
+    stopMotors();
+    drive(BACKWARD, 25, 3);
+    
+
+    //Thrusting lever, hook onto ticket, let go of ticket
+    turnPivotRight(FORWARD, 25, 90);
+    drive(FORWARD, 25, 24); //distance doesn't matter, only drive until bump switches are hit
+    while(right_switch.Value() || left_switch.Value());
+    stopMotors();
+    drive(BACKWARD, 25, 2.5);
+    turnPivotRight(BACKWARD,25, 14);
+    turnPivotLeft(FORWARD, 25, 14);
+    turn(RIGHT, 25, -28);
+}
 
 
 
